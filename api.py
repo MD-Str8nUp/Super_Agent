@@ -14,8 +14,8 @@ from typing import Dict, Any
 from web_functions import (
     create_notion_task_web, check_ndis_compliance_web, query_business_data_web,
     manage_msa_enrollment_web, generate_invoice_web, add_calendar_event_web, send_email_web,
-    create_google_calendar_event_web, get_upcoming_events_web, read_recent_emails_web,
-    send_gmail_web, check_calendar_availability_web
+    #create_google_calendar_event_web, get_upcoming_events_web, read_recent_emails_web,
+    #send_gmail_web, check_calendar_availability_web
 )
 from ops import SYSTEM_PROMPT
 
@@ -189,19 +189,19 @@ def execute_function(function_name):
             result = asyncio.run(manage_msa_enrollment_web(action=data.get('action', 'check_numbers')))
         elif function_name == "generate_invoice":
             result = asyncio.run(generate_invoice_web(client_name=data.get('client_name', ''), business=data.get('business', 'STR8N UP'), service=data.get('service', ''), amount=float(data.get('amount', 0))))
-        elif function_name == "add_event":
+        #elif function_name == "add_event":
             result = asyncio.run(add_calendar_event_web(title=data.get('title', ''), date=data.get('date', ''), time=data.get('time', ''), duration=int(data.get('duration', 60))))
-        elif function_name == "send_email":
+        #elif function_name == "send_email":
             result = asyncio.run(send_email_web(to_email=data.get('to_email', ''), subject=data.get('subject', ''), message=data.get('message', ''), cc_email=data.get('cc_email', '')))
-        elif function_name == "create_google_event":
+        #elif function_name == "create_google_event":
             result = asyncio.run(create_google_calendar_event_web(title=data.get('title', ''), start_datetime=data.get('start_datetime', ''), end_datetime=data.get('end_datetime', ''), description=data.get('description', ''), location=data.get('location', ''), attendees=data.get('attendees', '')))
-        elif function_name == "get_upcoming_events":
+       #elif function_name == "get_upcoming_events":
             result = asyncio.run(get_upcoming_events_web(days_ahead=int(data.get('days_ahead', 7)), max_results=int(data.get('max_results', 10))))
-        elif function_name == "read_emails":
+        #elif function_name == "read_emails":
             result = asyncio.run(read_recent_emails_web(max_results=int(data.get('max_results', 10)), query=data.get('query', 'is:unread')))
-        elif function_name == "send_gmail":
+        #elif function_name == "send_gmail":
             result = asyncio.run(send_gmail_web(to_email=data.get('to_email', ''), subject=data.get('subject', ''), body=data.get('body', ''), cc_email=data.get('cc_email', ''), bcc_email=data.get('bcc_email', '')))
-        elif function_name == "check_availability":
+        #elif function_name == "check_availability":
             result = asyncio.run(check_calendar_availability_web(start_datetime=data.get('start_datetime', ''), end_datetime=data.get('end_datetime', '')))
         else: return jsonify({"error": f"Unknown function: {function_name}"}), 400
         return jsonify({"result": result, "function": function_name, "timestamp": datetime.now().isoformat()})
