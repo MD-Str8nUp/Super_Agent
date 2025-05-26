@@ -11,13 +11,19 @@ import requests
 from typing import Dict, Any
 
 # Import your agent functions
-from web_functions import (
+# from web_functions import (
     create_notion_task_web, check_ndis_compliance_web, query_business_data_web,
     manage_msa_enrollment_web, generate_invoice_web, add_calendar_event_web, send_email_web,
     #create_google_calendar_event_web, get_upcoming_events_web, read_recent_emails_web,
     #send_gmail_web, check_calendar_availability_web
+# Temporarily disable all web functions to isolate the issue
+# from web_functions import (
+#     create_notion_task_web, check_ndis_compliance_web, query_business_data_web,
+#     manage_msa_enrollment_web, generate_invoice_web, add_calendar_event_web, send_email_web,
+# 
 )
-from ops import SYSTEM_PROMPT
+SYSTEM_PROMPT = "You are OPS.PY, an AI assistant for Mohamed Dhaini's businesses: STR8N UP, CSSA, and MSA. You help with task management, email communication, and business operations."
+# from ops import SYSTEM_PROMPT
 
 # Load environment variables
 load_dotenv()
