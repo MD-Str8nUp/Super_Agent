@@ -1,0 +1,1563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-title" content="OPS.PY">
+    <link rel="manifest" href="/static/manifest.json">
+    <title>OPS.PY - STR8N UP Operations Command Center</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.7.2/socket.io.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            /* Modern Navy & Orange Brand Colors */
+            --primary-navy: #1e293b;
+            --secondary-navy: #334155;
+            --accent-navy: #475569;
+            --primary-orange: #f97316;
+            --light-orange: #fed7aa;
+            --accent-orange: #ea580c;
+            --success-green: #10b981;
+            --warning-amber: #f59e0b;
+            --error-red: #ef4444;
+            
+            /* Grey Scale */
+            --grey-50: #f8fafc;
+            --grey-100: #f1f5f9;
+            --grey-200: #e2e8f0;
+            --grey-300: #cbd5e1;
+            --grey-400: #94a3b8;
+            --grey-500: #64748b;
+            --grey-600: #475569;
+            --grey-700: #334155;
+            --grey-800: #1e293b;
+            --grey-900: #0f172a;
+            
+            /* Modern Backgrounds */
+            --bg-primary: linear-gradient(135deg, #1e293b 0%, #334155 50%, #475569 100%);
+            --bg-glass: rgba(255, 255, 255, 0.1);
+            --bg-glass-strong: rgba(255, 255, 255, 0.15);
+            --bg-dark: rgba(15, 23, 42, 0.95);
+            --bg-card: rgba(255, 255, 255, 0.98);
+            
+            /* Text */
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-light: #ffffff;
+            --text-muted: #94a3b8;
+            
+            /* Enhanced Shadows */
+            --shadow-sm: 0 4px 6px -1px rgba(15, 23, 42, 0.1);
+            --shadow-md: 0 10px 15px -3px rgba(15, 23, 42, 0.1);
+            --shadow-lg: 0 20px 25px -5px rgba(15, 23, 42, 0.1);
+            --shadow-xl: 0 25px 50px -12px rgba(15, 23, 42, 0.25);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg-primary);
+            min-height: 100vh;
+            color: var(--text-primary);
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+            position: relative;
+        }
+
+        /* Header */
+        .header {
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 24px;
+            padding: 24px 32px;
+            margin-bottom: 32px;
+            box-shadow: var(--shadow-xl);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--primary-navy), var(--secondary-navy), var(--error-red));
+        }
+
+        .header-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .brand-icon {
+            width: 56px;
+            height: 56px;
+            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            box-shadow: var(--shadow-md);
+        }
+
+        .brand-text h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 4px;
+        }
+
+        .brand-text .subtitle {
+            color: var(--text-secondary);
+            font-size: 1.1rem;
+            font-weight: 500;
+        }
+
+        .voice-controls {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .voice-btn {
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            border: none;
+            background: linear-gradient(135deg, var(--error-red), var(--accent-orange));
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: var(--shadow-lg);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .voice-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .voice-btn.recording {
+            animation: pulse 1.5s infinite;
+            background: linear-gradient(135deg, var(--error-red), var(--error-red));
+        }
+
+        .voice-btn.processing {
+            background: linear-gradient(135deg, var(--warning-amber), var(--accent-orange));
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .voice-status {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+        }
+
+        .voice-status-text {
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .voice-status-sub {
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+        }
+
+        /* Status Bar */
+        .status-bar {
+            background: var(--bg-dark);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 16px;
+            padding: 16px 24px;
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: var(--text-light);
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--success-green);
+            animation: pulse-dot 2s infinite;
+        }
+
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
+        }
+
+        .status-text {
+            font-weight: 500;
+        }
+
+        .last-updated {
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        /* Business Cards Grid */
+        .business-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        .business-card {
+            background: var(--bg-card);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--shadow-lg);
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .business-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .business-card.str8n {
+            border-top: 3px solid var(--primary-navy);
+        }
+
+        .business-card.cssa {
+            border-top: 3px solid var(--error-red);
+        }
+
+        .business-card.msa {
+            border-top: 3px solid var(--warning-amber);
+        }
+
+        .business-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .business-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+        }
+
+        .business-icon.str8n {
+            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
+        }
+
+        .business-icon.cssa {
+            background: linear-gradient(135deg, var(--error-red), var(--error-red));
+        }
+
+        .business-icon.msa {
+            background: linear-gradient(135deg, var(--warning-amber), var(--accent-orange));
+        }
+
+        .business-name {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .business-stats {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .stat-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+        }
+
+        .stat-label {
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+
+        .stat-value {
+            font-weight: 700;
+            color: var(--text-primary);
+            padding: 4px 12px;
+            background: var(--bg-glass);
+            border-radius: 12px;
+            font-size: 0.9rem;
+        }
+
+        /* Main Content Grid */
+        .main-content {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+            margin-bottom: 32px;
+        }
+
+        /* Chat Interface */
+        .chat-section {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .chat-header {
+            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
+            color: white;
+            padding: 20px 24px;
+            display: flex;
+            justify-content: between;
+            align-items: center;
+        }
+
+        .chat-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .chat-messages {
+            height: 400px;
+            overflow-y: auto;
+            padding: 20px;
+            background: linear-gradient(to bottom, #f8fafc, #f1f5f9);
+        }
+
+        .message {
+            margin-bottom: 16px;
+            max-width: 85%;
+            animation: slideIn 0.3s ease;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .message.user {
+            margin-left: auto;
+        }
+
+        .message-bubble {
+            padding: 12px 16px;
+            border-radius: 16px;
+            font-size: 0.95rem;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        .message.user .message-bubble {
+            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
+            color: white;
+            margin-left: auto;
+        }
+
+        .message.agent .message-bubble {
+            background: white;
+            color: var(--text-primary);
+            border: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .message-time {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-top: 4px;
+            text-align: right;
+        }
+
+        .message.agent .message-time {
+            text-align: left;
+        }
+
+        .chat-input-section {
+            padding: 20px;
+            background: white;
+            border-top: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .chat-input-container {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .chat-input {
+            flex: 1;
+            padding: 14px 18px;
+            border: 2px solid #e2e8f0;
+            border-radius: 24px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: #f8fafc;
+        }
+
+        .chat-input:focus {
+            border-color: var(--primary-navy);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .send-btn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .send-btn:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 24px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .quick-actions-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .quick-actions-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .action-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .action-btn {
+            width: 100%;
+            padding: 16px 20px;
+            border: none;
+            border-radius: 16px;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-align: left;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn:hover {
+            transform: translateX(4px);
+            box-shadow: var(--shadow-md);
+        }
+
+        .action-btn.str8n {
+            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
+        }
+
+        .action-btn.cssa {
+            background: linear-gradient(135deg, var(--error-red), var(--error-red));
+        }
+
+        .action-btn.msa {
+            background: linear-gradient(135deg, var(--warning-amber), var(--accent-orange));
+        }
+
+        .action-btn.general {
+            background: linear-gradient(135deg, var(--text-secondary), var(--text-primary));
+        }
+
+        .action-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Form Panels */
+        .form-panel {
+            background: var(--bg-card);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 24px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            animation: slideDown 0.3s ease;
+        }
+
+        @keyframes slideDown {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .form-panel.active {
+            display: block;
+        }
+
+        .form-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+
+        .form-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--text-primary);
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .form-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .form-field.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .form-label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            padding: 12px 16px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            border-color: var(--primary-navy);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .form-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .form-btn.primary {
+            background: linear-gradient(135deg, var(--primary-navy), var(--secondary-navy));
+            color: white;
+        }
+
+        .form-btn.secondary {
+            background: #e2e8f0;
+            color: var(--text-secondary);
+        }
+
+        .form-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: var(--shadow-md);
+        }
+
+        /* Alerts */
+        .alert {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            z-index: 1000;
+            animation: slideInRight 0.3s ease;
+            max-width: 400px;
+        }
+
+        @keyframes slideInRight {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+
+        .alert.success {
+            background: var(--success-green);
+            color: white;
+        }
+
+        .alert.error {
+            background: var(--error-red);
+            color: white;
+        }
+
+        .alert.info {
+            background: var(--primary-navy);
+            color: white;
+        }
+
+        /* Voice Visualization */
+        .voice-viz {
+            display: none;
+            align-items: center;
+            justify-content: center;
+            gap: 4px;
+            margin: 0 16px;
+        }
+
+        .voice-viz.active {
+            display: flex;
+        }
+
+        .voice-bar {
+            width: 3px;
+            height: 20px;
+            background: white;
+            border-radius: 2px;
+            animation: voiceWave 1.2s ease-in-out infinite;
+        }
+
+        .voice-bar:nth-child(2) { animation-delay: 0.1s; }
+        .voice-bar:nth-child(3) { animation-delay: 0.2s; }
+        .voice-bar:nth-child(4) { animation-delay: 0.3s; }
+        .voice-bar:nth-child(5) { animation-delay: 0.4s; }
+
+        @keyframes voiceWave {
+            0%, 100% { height: 20px; }
+            50% { height: 8px; }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 1024px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .business-grid {
+                grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            }
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 16px;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .business-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Loading States */
+        .loading {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--text-secondary);
+        }
+
+        .spinner {
+            width: 16px;
+            height: 16px;
+            border: 2px solid #f3f3f3;
+            border-top: 2px solid var(--primary-navy);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="brand">
+                    <div class="brand-icon">
+                        <i class="fas fa-robot"></i>
+                    </div>
+                    <div class="brand-text">
+                        <h1>OPS.PY</h1>
+                        <div class="subtitle">STR8N UP Operations Command Center</div>
+                    </div>
+                </div>
+                
+                <div class="voice-controls">
+                    <div class="voice-status">
+                        <div class="voice-status-text" id="voice-status-text">Voice Ready</div>
+                        <div class="voice-status-sub" id="voice-status-sub">Click to start voice command</div>
+                    </div>
+                    <button class="voice-btn" id="voice-btn" onclick="toggleVoice()">
+                        <i class="fas fa-microphone" id="voice-icon"></i>
+                    </button>
+                    <div class="voice-viz" id="voice-viz">
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                        <div class="voice-bar"></div>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Status Bar -->
+        <div class="status-bar">
+            <div class="status-indicator">
+                <div class="status-dot"></div>
+                <span class="status-text" id="agent-status">Connected to OPS.PY</span>
+            </div>
+            <div class="last-updated" id="last-updated">Last updated: Loading...</div>
+        </div>
+
+        <!-- Business Overview -->
+        <div class="business-grid" id="business-overview">
+            <div class="business-card str8n">
+                <div class="business-header">
+                    <div class="business-icon str8n">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="business-name">STR8N UP Growth Hub</div>
+                </div>
+                <div class="business-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Status</span>
+                        <span class="stat-value" id="str8n-status">Loading...</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Priority Items</span>
+                        <span class="stat-value" id="str8n-priority">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Deadlines</span>
+                        <span class="stat-value" id="str8n-deadlines">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="business-card cssa">
+                <div class="business-header">
+                    <div class="business-icon cssa">
+                        <i class="fas fa-heart"></i>
+                    </div>
+                    <div class="business-name">CSSA (Care Support)</div>
+                </div>
+                <div class="business-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Status</span>
+                        <span class="stat-value" id="cssa-status">Loading...</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Priority Items</span>
+                        <span class="stat-value" id="cssa-priority">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Deadlines</span>
+                        <span class="stat-value" id="cssa-deadlines">-</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="business-card msa">
+                <div class="business-header">
+                    <div class="business-icon msa">
+                        <i class="fas fa-campground"></i>
+                    </div>
+                    <div class="business-name">MSA (Miraj Scouts)</div>
+                </div>
+                <div class="business-stats">
+                    <div class="stat-row">
+                        <span class="stat-label">Status</span>
+                        <span class="stat-value" id="msa-status">Loading...</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Priority Items</span>
+                        <span class="stat-value" id="msa-priority">-</span>
+                    </div>
+                    <div class="stat-row">
+                        <span class="stat-label">Deadlines</span>
+                        <span class="stat-value" id="msa-deadlines">-</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="main-content">
+            <!-- Chat Interface -->
+            <div class="chat-section">
+                <div class="chat-header">
+                    <div class="chat-title">
+                        <i class="fas fa-comments"></i>
+                        Chat with OPS.PY
+                    </div>
+                </div>
+                <div class="chat-messages" id="chat-messages">
+                    <div class="message agent">
+                        <div class="message-bubble">
+                            <div>OPS.PY is online and ready to help you manage STR8N UP, CSSA, and MSA operations. What do you need assistance with?</div>
+                        </div>
+                        <div class="message-time">Just now</div>
+                    </div>
+                </div>
+                <div class="chat-input-section">
+                    <div class="chat-input-container">
+                        <input type="text" class="chat-input" id="chat-input" placeholder="Ask OPS.PY anything about your businesses..." />
+                        <button class="send-btn" onclick="sendMessage()">
+                            <i class="fas fa-paper-plane"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="quick-actions">
+                <div class="quick-actions-header">
+                    <i class="fas fa-bolt"></i>
+                    <div class="quick-actions-title">Quick Actions</div>
+                </div>
+                <div class="action-grid">
+                    <button class="action-btn str8n" onclick="quickAction('query_business', {business: 'STR8N UP'})">
+                        <i class="fas fa-chart-line action-icon"></i>
+                        <span>STR8N UP Overview</span>
+                    </button>
+                    <button class="action-btn cssa" onclick="quickAction('check_compliance', {area: 'audit'})">
+                        <i class="fas fa-clipboard-check action-icon"></i>
+                        <span>NDIS Audit Status</span>
+                    </button>
+                    <button class="action-btn msa" onclick="quickAction('manage_enrollment', {action: 'check_numbers'})">
+                        <i class="fas fa-users action-icon"></i>
+                        <span>MSA Enrollment Check</span>
+                    </button>
+                    <button class="action-btn general" onclick="quickAction('query_business', {business: 'ALL'})">
+                        <i class="fas fa-building action-icon"></i>
+                        <span>All Business Overview</span>
+                    </button>
+                    <button class="action-btn cssa" onclick="showForm('task-form')">
+                        <i class="fas fa-plus action-icon"></i>
+                        <span>Create New Task</span>
+                    </button>
+                    <button class="action-btn str8n" onclick="showForm('event-form')">
+                        <i class="fas fa-calendar-plus action-icon"></i>
+                        <span>Add Calendar Event</span>
+                    </button>
+                    <button class="action-btn general" onclick="quickAction('get_upcoming_events', {days_ahead: 7})">
+                        <i class="fas fa-calendar action-icon"></i>
+                        <span>Upcoming Events</span>
+                    </button>
+                    <button class="action-btn cssa" onclick="quickAction('read_emails', {max_results: 5})">
+                        <i class="fas fa-envelope action-icon"></i>
+                        <span>Recent Emails</span>
+                    </button>
+                    <button class="action-btn msa" onclick="showForm('google-calendar-form')">
+                        <i class="fas fa-google action-icon"></i>
+                        <span>Google Calendar</span>
+                    </button>
+                    <button class="action-btn str8n" onclick="showForm('gmail-form')">
+                        <i class="fas fa-paper-plane action-icon"></i>
+                        <span>Send Gmail</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Form Panels -->
+        <div class="form-panel" id="task-form">
+            <div class="form-header">
+                <i class="fas fa-plus"></i>
+                <div class="form-title">Create New Task</div>
+            </div>
+            <div class="form-grid">
+                <div class="form-field">
+                    <label class="form-label">Task Title</label>
+                    <input type="text" class="form-input" id="task-title" placeholder="Enter task title" />
+                </div>
+                <div class="form-field">
+                    <label class="form-label">Business</label>
+                    <select class="form-select" id="task-project">
+                        <option value="STR8N UP">STR8N UP</option>
+                        <option value="CSSA">CSSA</option>
+                        <option value="MSA">MSA</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label class="form-label">Priority</label>
+                    <select class="form-select" id="task-priority">
+                        <option value="Low">Low Priority</option>
+                        <option value="Medium">Medium Priority</option>
+                        <option value="High">High Priority</option>
+                    </select>
+                </div>
+                <div class="form-field">
+                    <label class="form-label">Due Date</label>
+                    <input type="date" class="form-input" id="task-due-date" />
+                </div>
+                <div class="form-field full-width">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="task-description" placeholder="Task description"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="form-btn secondary" onclick="hideForm('task-form')">Cancel</button>
+                <button class="form-btn primary" onclick="createTask()">Create Task</button>
+            </div>
+        </div>
+
+        <div class="form-panel" id="event-form">
+            <div class="form-header">
+                <i class="fas fa-calendar-plus"></i>
+                <div class="form-title">Add Calendar Event</div>
+            </div>
+            <div class="form-grid">
+                <div class="form-field">
+                    <label class="form-label">Event Title</label>
+                    <input type="text" class="form-input" id="event-title" placeholder="Enter event title" />
+                </div>
+                <div class="form-field">
+                    <label class="form-label">Date</label>
+                    <input type="date" class="form-input" id="event-date" />
+                </div>
+                <div class="form-field">
+                    <label class="form-label">Time</label>
+                    <input type="time" class="form-input" id="event-time" />
+                </div>
+                <div class="form-field">
+                    <label class="form-label">Duration (minutes)</label>
+                    <input type="number" class="form-input" id="event-duration" value="60" placeholder="60" />
+                </div>
+                <div class="form-field">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" id="event-location" placeholder="Event location" />
+                </div>
+                <div class="form-field full-width">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="event-description" placeholder="Event description"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="form-btn secondary" onclick="hideForm('event-form')">Cancel</button>
+                <button class="form-btn primary" onclick="createEvent()">Add Event</button>
+            </div>
+        </div>
+
+        <!-- Google Calendar Form -->
+        <div class="form-panel" id="google-calendar-form">
+            <div class="form-header">
+                <i class="fas fa-google"></i>
+                <div class="form-title">Create Google Calendar Event</div>
+            </div>
+            <div class="form-grid">
+                <div class="form-field">
+                    <label class="form-label">Event Title</label>
+                    <input type="text" class="form-input" id="google-event-title" placeholder="Enter event title" />
+                </div>
+                <div class="form-field">
+                    <label class="form-label">Start Date & Time</label>
+                    <input type="datetime-local" class="form-input" id="google-event-start" />
+                </div>
+                <div class="form-field">
+                    <label class="form-label">End Date & Time</label>
+                    <input type="datetime-local" class="form-input" id="google-event-end" />
+                </div>
+                <div class="form-field">
+                    <label class="form-label">Location</label>
+                    <input type="text" class="form-input" id="google-event-location" placeholder="Event location" />
+                </div>
+                <div class="form-field">
+                    <label class="form-label">Attendees (comma-separated emails)</label>
+                    <input type="text" class="form-input" id="google-event-attendees" placeholder="email1@example.com, email2@example.com" />
+                </div>
+                <div class="form-field full-width">
+                    <label class="form-label">Description</label>
+                    <textarea class="form-textarea" id="google-event-description" placeholder="Event description"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="form-btn secondary" onclick="hideForm('google-calendar-form')">Cancel</button>
+                <button class="form-btn primary" onclick="createGoogleEvent()">Create Google Event</button>
+            </div>
+        </div>
+
+        <!-- Gmail Form -->
+        <div class="form-panel" id="gmail-form">
+            <div class="form-header">
+                <i class="fas fa-paper-plane"></i>
+                <div class="form-title">Send Gmail</div>
+            </div>
+            <div class="form-grid">
+                <div class="form-field">
+                    <label class="form-label">To</label>
+                    <input type="email" class="form-input" id="gmail-to" placeholder="recipient@example.com" />
+                </div>
+                <div class="form-field">
+                    <label class="form-label">CC (optional)</label>
+                    <input type="email" class="form-input" id="gmail-cc" placeholder="cc@example.com" />
+                </div>
+                <div class="form-field full-width">
+                    <label class="form-label">Subject</label>
+                    <input type="text" class="form-input" id="gmail-subject" placeholder="Email subject" />
+                </div>
+                <div class="form-field full-width">
+                    <label class="form-label">Message</label>
+                    <textarea class="form-textarea" id="gmail-body" placeholder="Your email message..." rows="6"></textarea>
+                </div>
+            </div>
+            <div class="form-actions">
+                <button class="form-btn secondary" onclick="hideForm('gmail-form')">Cancel</button>
+                <button class="form-btn primary" onclick="sendGmail()">Send Email</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Initialize Socket.IO connection
+        const socket = io();
+        
+        // Global variables
+        let conversationHistory = [];
+        let isRecording = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadOverview();
+            loadConversationHistory();
+            
+            // Setup chat input enter key handler
+            document.getElementById('chat-input').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    sendMessage();
+                }
+            });
+        });
+
+        // Socket.IO event handlers
+        socket.on('connect', function() {
+            console.log('Connected to OPS.PY');
+            updateVoiceStatus('Connected', 'Voice commands ready');
+        });
+
+        socket.on('disconnect', function() {
+            console.log('Disconnected from OPS.PY');
+            updateVoiceStatus('Disconnected', 'Reconnecting...');
+        });
+
+        socket.on('agent_response', function(data) {
+            console.log('Agent response:', data);
+            addMessage('agent', data.result);
+        });
+
+        // Voice functionality
+        async function toggleVoice() {
+            if (!isRecording) {
+                await startVoiceRecording();
+            } else {
+                stopVoiceRecording();
+            }
+        }
+
+        async function startVoiceRecording() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                mediaRecorder = new MediaRecorder(stream);
+                audioChunks = [];
+
+                mediaRecorder.ondataavailable = event => {
+                    audioChunks.push(event.data);
+                };
+
+                mediaRecorder.onstop = async () => {
+                    const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                    await processVoiceInput(audioBlob);
+                };
+
+                mediaRecorder.start();
+                isRecording = true;
+                
+                // Update UI
+                document.getElementById('voice-btn').classList.add('recording');
+                document.getElementById('voice-icon').className = 'fas fa-stop';
+                document.getElementById('voice-viz').classList.add('active');
+                updateVoiceStatus('Recording', 'Listening to your command...');
+                
+            } catch (error) {
+                console.error('Error accessing microphone:', error);
+                showAlert('Microphone access denied. Please enable microphone permissions.', 'error');
+            }
+        }
+
+        function stopVoiceRecording() {
+            if (mediaRecorder && isRecording) {
+                mediaRecorder.stop();
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+                isRecording = false;
+                
+                // Update UI
+                document.getElementById('voice-btn').classList.remove('recording');
+                document.getElementById('voice-btn').classList.add('processing');
+                document.getElementById('voice-icon').className = 'fas fa-cog fa-spin';
+                document.getElementById('voice-viz').classList.remove('active');
+                updateVoiceStatus('Processing', 'Converting speech to text...');
+            }
+        }
+
+        async function processVoiceInput(audioBlob) {
+            try {
+                // Use Web Speech API for real speech recognition
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    const recognition = new SpeechRecognition();
+                    
+                    recognition.continuous = false;
+                    recognition.interimResults = false;
+                    recognition.lang = 'en-US';
+                    
+                    recognition.onresult = function(event) {
+                        const speechText = event.results[0][0].transcript;
+                        
+                        document.getElementById('voice-btn').classList.remove('processing');
+                        document.getElementById('voice-icon').className = 'fas fa-microphone';
+                        updateVoiceStatus('Voice Ready', 'Click to start voice command');
+                        
+                        // Put the actual speech text in the chat input
+                        document.getElementById('chat-input').value = speechText;
+                        sendMessage();
+                    };
+                    
+                    recognition.onerror = function(event) {
+                        console.error('Speech recognition error:', event.error);
+                        showAlert(`Voice recognition error: ${event.error}`, 'error');
+                        
+                        document.getElementById('voice-btn').classList.remove('processing');
+                        document.getElementById('voice-icon').className = 'fas fa-microphone';
+                        updateVoiceStatus('Voice Ready', 'Click to start voice command');
+                    };
+                    
+                    recognition.start();
+                } else {
+                    // Fallback for browsers without speech recognition
+                    setTimeout(() => {
+                        document.getElementById('voice-btn').classList.remove('processing');
+                        document.getElementById('voice-icon').className = 'fas fa-microphone';
+                        updateVoiceStatus('Voice Ready', 'Click to start voice command');
+                        
+                        showAlert('Speech recognition not supported in this browser. Please type your message.', 'error');
+                    }, 1000);
+                }
+            } catch (error) {
+                console.error('Error processing voice input:', error);
+                showAlert('Error processing voice input. Please try again.', 'error');
+
+                document.getElementById('voice-btn').classList.remove('processing');
+                document.getElementById('voice-icon').className = 'fas fa-microphone';
+                updateVoiceStatus('Voice Ready', 'Click to start voice command');
+            }
+        }
+
+        function updateVoiceStatus(text, subtext) {
+            document.getElementById('voice-status-text').textContent = text;
+            document.getElementById('voice-status-sub').textContent = subtext;
+        }
+
+        // Load business overview
+        async function loadOverview() {
+            try {
+                const response = await fetch('/api/overview');
+                const data = await response.json();
+                
+                if (data.businesses) {
+                    // Update STR8N UP
+                    document.getElementById('str8n-status').textContent = data.businesses['STR8N UP'].status;
+                    document.getElementById('str8n-priority').textContent = data.businesses['STR8N UP'].priority_items;
+                    document.getElementById('str8n-deadlines').textContent = data.businesses['STR8N UP'].upcoming_deadlines;
+                    
+                    // Update CSSA
+                    document.getElementById('cssa-status').textContent = data.businesses['CSSA'].status;
+                    document.getElementById('cssa-priority').textContent = data.businesses['CSSA'].priority_items;
+                    document.getElementById('cssa-deadlines').textContent = data.businesses['CSSA'].upcoming_deadlines;
+                    
+                    // Update MSA
+                    document.getElementById('msa-status').textContent = data.businesses['MSA'].status;
+                    document.getElementById('msa-priority').textContent = data.businesses['MSA'].priority_items;
+                    document.getElementById('msa-deadlines').textContent = data.businesses['MSA'].upcoming_deadlines;
+                }
+                
+                document.getElementById('last-updated').textContent = `Last updated: ${new Date(data.last_updated).toLocaleTimeString()}`;
+                
+            } catch (error) {
+                console.error('Error loading overview:', error);
+                showAlert('Error loading business overview', 'error');
+            }
+        }
+
+        // Load conversation history
+        async function loadConversationHistory() {
+            try {
+                const response = await fetch('/api/conversation');
+                const data = await response.json();
+                
+                conversationHistory = data.history || [];
+                
+                // Clear chat and rebuild
+                const chatMessages = document.getElementById('chat-messages');
+                chatMessages.innerHTML = '';
+                
+                // Add initial agent message if no history
+                if (conversationHistory.length === 0) {
+                    addMessage('agent', 'OPS.PY is online and ready to help you manage STR8N UP, CSSA, and MSA operations. What do you need assistance with?');
+                } else {
+                    // Display conversation history
+                    conversationHistory.forEach(msg => {
+                        addMessage(msg.role === 'user' ? 'user' : 'agent', msg.content, msg.timestamp);
+                    });
+                }
+                
+            } catch (error) {
+                console.error('Error loading conversation:', error);
+            }
+        }
+
+        // Send chat message
+        async function sendMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message to chat
+            addMessage('user', message);
+            input.value = '';
+            
+            // Show loading
+            const loadingDiv = addMessage('agent', '<div class="loading"><div class="spinner"></div>Thinking...</div>');
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // Remove loading message
+                loadingDiv.remove();
+                
+                if (data.error) {
+                    addMessage('agent', `❌ Error: ${data.error}`);
+                } else {
+                    addMessage('agent', data.response);
+                }
+                
+            } catch (error) {
+                loadingDiv.remove();
+                addMessage('agent', `❌ Connection error: ${error.message}`);
+                console.error('Chat error:', error);
+            }
+        }
+
+        // Add message to chat
+        function addMessage(type, content, timestamp) {
+            const chatMessages = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = `message ${type}`;
+            
+            const timeStr = timestamp ? new Date(timestamp).toLocaleTimeString() : new Date().toLocaleTimeString();
+            
+            messageDiv.innerHTML = `
+                <div class="message-bubble">
+                    <div>${content}</div>
+                </div>
+                <div class="message-time">${timeStr}</div>
+            `;
+            
+            chatMessages.appendChild(messageDiv);
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+            
+            return messageDiv;
+        }
+
+        // Quick action handler
+        async function quickAction(functionName, params) {
+            try {
+                showAlert('Executing action...', 'info');
+                
+                const response = await fetch(`/api/functions/${functionName}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(params)
+                });
+                
+                const data = await response.json();
+                
+                if (data.error) {
+                    showAlert(`Error: ${data.error}`, 'error');
+                } else {
+                    addMessage('agent', data.result);
+                    showAlert('Action completed successfully!', 'success');
+                }
+                
+            } catch (error) {
+                showAlert(`Connection error: ${error.message}`, 'error');
+                console.error('Quick action error:', error);
+            }
+        }
+
+        // Form management
+        function showForm(formId) {
+            // Hide all forms
+            document.querySelectorAll('.form-panel').forEach(form => {
+                form.classList.remove('active');
+            });
+            
+            // Show requested form
+            document.getElementById(formId).classList.add('active');
+            
+            // Scroll to form
+            document.getElementById(formId).scrollIntoView({ 
+                behavior: 'smooth', 
+                block: 'center' 
+            });
+        }
+
+        function hideForm(formId) {
+            document.getElementById(formId).classList.remove('active');
+        }
+
+        // Create task
+        async function createTask() {
+            const params = {
+                title: document.getElementById('task-title').value,
+                project: document.getElementById('task-project').value,
+                priority: document.getElementById('task-priority').value,
+                due_date: document.getElementById('task-due-date').value,
+                description: document.getElementById('task-description').value
+            };
+            
+            if (!params.title) {
+                showAlert('Task title is required', 'error');
+                return;
+            }
+            
+            await quickAction('create_task', params);
+            hideForm('task-form');
+            
+            // Clear form
+            document.getElementById('task-title').value = '';
+            document.getElementById('task-description').value = '';
+        }
+
+        // Create event
+        async function createEvent() {
+            const params = {
+                title: document.getElementById('event-title').value,
+                date: document.getElementById('event-date').value,
+                time: document.getElementById('event-time').value,
+                duration: document.getElementById('event-duration').value,
+                location: document.getElementById('event-location').value,
+                description: document.getElementById('event-description').value
+            };
+            
+            if (!params.title || !params.date || !params.time) {
+                showAlert('Event title, date, and time are required', 'error');
+                return;
+            }
+            
+            await quickAction('add_event', params);
+            hideForm('event-form');
+            
+            // Clear form
+            document.getElementById('event-title').value = '';
+            document.getElementById('event-description').value = '';
+        }
+
+        // Create Google Calendar event
+        async function createGoogleEvent() {
+            const startDateTime = document.getElementById('google-event-start').value;
+            const endDateTime = document.getElementById('google-event-end').value;
+            
+            const params = {
+                title: document.getElementById('google-event-title').value,
+                start_datetime: startDateTime ? new Date(startDateTime).toISOString() : '',
+                end_datetime: endDateTime ? new Date(endDateTime).toISOString() : '',
+                location: document.getElementById('google-event-location').value,
+                description: document.getElementById('google-event-description').value,
+                attendees: document.getElementById('google-event-attendees').value
+            };
+            
+            if (!params.title || !params.start_datetime || !params.end_datetime) {
+                showAlert('Event title, start time, and end time are required', 'error');
+                return;
+            }
+            
+            await quickAction('create_google_event', params);
+            hideForm('google-calendar-form');
+            
+            // Clear form
+            document.getElementById('google-event-title').value = '';
+            document.getElementById('google-event-start').value = '';
+            document.getElementById('google-event-end').value = '';
+            document.getElementById('google-event-location').value = '';
+            document.getElementById('google-event-description').value = '';
+            document.getElementById('google-event-attendees').value = '';
+        }
+
+        // Send Gmail
+        async function sendGmail() {
+            const params = {
+                to_email: document.getElementById('gmail-to').value,
+                subject: document.getElementById('gmail-subject').value,
+                body: document.getElementById('gmail-body').value,
+                cc_email: document.getElementById('gmail-cc').value
+            };
+            
+            if (!params.to_email || !params.subject || !params.body) {
+                showAlert('To, subject, and message are required', 'error');
+                return;
+            }
+            
+            await quickAction('send_gmail', params);
+            hideForm('gmail-form');
+            
+            // Clear form
+            document.getElementById('gmail-to').value = '';
+            document.getElementById('gmail-subject').value = '';
+            document.getElementById('gmail-body').value = '';
+            document.getElementById('gmail-cc').value = '';
+        }
+
+        // Show alert
+        function showAlert(message, type = 'info') {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert ${type}`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation-triangle' : 'info'}"></i>
+                ${message}
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            // Auto-remove after 5 seconds
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Auto-refresh overview every 30 seconds
+        setInterval(loadOverview, 30000);
+    </script>
+</body>
+</html>

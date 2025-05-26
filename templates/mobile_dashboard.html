@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SuperAgent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="/static/manifest.json">
+    <title>Super Agent - Mobile Command Center</title>
+    
+    <!-- PWA Icons -->
+    <link rel="apple-touch-icon" href="/static/icon-192.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="/static/icon-192.png">
+    
+    <!-- Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-navy: #1e293b;
+            --secondary-navy: #334155;
+            --primary-orange: #f97316;
+            --light-orange: #fed7aa;
+            --success-green: #10b981;
+            --warning-amber: #f59e0b;
+            --error-red: #ef4444;
+            --grey-100: #f1f5f9;
+            --grey-200: #e2e8f0;
+            --grey-300: #cbd5e1;
+            --grey-500: #64748b;
+            --grey-800: #1e293b;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-light: #ffffff;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, var(--primary-navy) 0%, var(--secondary-navy) 100%);
+            color: var(--text-light);
+            min-height: 100vh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* Mobile-first responsive design */
+        .container {
+            max-width: 100%;
+            padding: 1rem;
+            margin: 0 auto;
+        }
+
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .header h1 {
+            font-size: 1.75rem;
+            font-weight: 800;
+            margin-bottom: 0.5rem;
+            background: linear-gradient(135deg, var(--primary-orange), var(--light-orange));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .header p {
+            color: var(--grey-300);
+            font-size: 0.9rem;
+        }
+
+        /* Status indicators */
+        .status-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .status-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(20px);
+            border-radius: 1rem;
+            padding: 1rem;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .status-card:hover {
+            transform: translateY(-2px);
+            background: rgba(255, 255, 255, 0.15);
+        }
+
+        .status-icon {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .status-icon.success { color: var(--success-green); }
+        .status-icon.warning { color: var(--warning-amber); }
+        .status-icon.error { color: var(--error-red); }
+
+        .status-title {
+            font-size: 0.8rem;
+            color: var(--grey-300);
+            margin-bottom: 0.25rem;
+        }
+
+        .status-value {
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        /* Action buttons */
+        .actions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .action-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 1rem;
+            padding: 1.5rem;
+            color: var(--text-primary);
+            border: 1px solid var(--grey-200);
+            transition: all 0.3s ease;
+        }
+
+        .action-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+
+        .action-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .action-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 1rem;
+            font-size: 1.2rem;
+            color: white;
+        }
+
+        .action-icon.email { background: var(--primary-orange); }
+        .action-icon.notion { background: var(--primary-navy); }
+        .action-icon.calendar { background: var(--success-green); }
+
+        .action-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--text-primary);
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+        }
+
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--grey-300);
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: var(--primary-orange);
+            box-shadow: 0 0 0 3px rgba(249, 115, 22, 0.1);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Buttons */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            gap: 0.5rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-orange);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-orange);
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(249, 115, 22, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--grey-200);
+            color: var(--text-primary);
+        }
+
+        .btn-secondary:hover {
+            background: var(--grey-300);
+        }
+
+        .btn-full {
+            width: 100%;
+        }
+
+        /* Results */
+        .result {
+            margin-top: 1rem;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.9rem;
+            display: none;
+        }
+
+        .result.success {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid var(--success-green);
+            color: var(--success-green);
+        }
+
+        .result.error {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid var(--error-red);
+            color: var(--error-red);
+        }
+
+        /* Loading states */
+        .loading {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid transparent;
+            border-top: 2px solid currentColor;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Mobile optimizations */
+        @media (max-width: 768px) {
+            .container {
+                padding: 0.75rem;
+            }
+
+            .header {
+                padding: 1rem;
+                margin-bottom: 1rem;
+            }
+
+            .header h1 {
+                font-size: 1.5rem;
+            }
+
+            .actions-grid {
+                grid-template-columns: 1fr;
+                gap: 0.75rem;
+            }
+
+            .action-card {
+                padding: 1rem;
+            }
+
+            .status-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 0.75rem;
+            }
+        }
+
+        /* Touch improvements */
+        @media (hover: none) and (pointer: coarse) {
+            .btn, .action-card, .status-card {
+                transform: none !important;
+            }
+            
+            .btn:active {
+                transform: scale(0.98);
+            }
+        }
+
+        /* Dark mode support */
+        @media (prefers-color-scheme: dark) {
+            .action-card {
+                background: rgba(255, 255, 255, 0.1);
+                color: var(--text-light);
+                border-color: rgba(255, 255, 255, 0.1);
+            }
+            
+            .form-input, .form-select, .form-textarea {
+                background: rgba(255, 255, 255, 0.1);
+                border-color: rgba(255, 255, 255, 0.2);
+                color: var(--text-light);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-robot"></i> Super Agent</h1>
+            <p>AI-Powered Operations Command Center</p>
+        </div>
+
+        <!-- Status Grid -->
+        <div class="status-grid">
+            <div class="status-card">
+                <div class="status-icon success">
+                    <i class="fas fa-envelope"></i>
+                </div>
+                <div class="status-title">Email</div>
+                <div class="status-value">Ready</div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon success">
+                    <i class="fas fa-tasks"></i>
+                </div>
+                <div class="status-title">Notion</div>
+                <div class="status-value">Connected</div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon success">
+                    <i class="fas fa-calendar"></i>
+                </div>
+                <div class="status-title">Calendar</div>
+                <div class="status-value">Active</div>
+            </div>
+            <div class="status-card">
+                <div class="status-icon success">
+                    <i class="fas fa-microphone"></i>
+                </div>
+                <div class="status-title">Voice</div>
+                <div class="status-value">Ready</div>
+            </div>
+        </div>
+
+        <!-- Actions Grid -->
+        <div class="actions-grid">
+            <!-- Email Action -->
+            <div class="action-card">
+                <div class="action-header">
+                    <div class="action-icon email">
+                        <i class="fas fa-envelope"></i>
+                    </div>
+                    <div class="action-title">Send Email</div>
+                </div>
+                <form id="emailForm">
+                    <div class="form-group">
+                        <label class="form-label">To Email</label>
+                        <input type="email" class="form-input" id="emailTo" placeholder="recipient@example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Subject</label>
+                        <input type="text" class="form-input" id="emailSubject" placeholder="Email subject" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message</label>
+                        <textarea class="form-textarea" id="emailMessage" placeholder="Your message here..." required></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-paper-plane"></i>
+                        Send Email
+                    </button>
+                    <div id="emailResult" class="result"></div>
+                </form>
+            </div>
+
+            <!-- Notion Task Action -->
+            <div class="action-card">
+                <div class="action-header">
+                    <div class="action-icon notion">
+                        <i class="fas fa-tasks"></i>
+                    </div>
+                    <div class="action-title">Create Task</div>
+                </div>
+                <form id="taskForm">
+                    <div class="form-group">
+                        <label class="form-label">Task Title</label>
+                        <input type="text" class="form-input" id="taskTitle" placeholder="Task description" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Project</label>
+                        <select class="form-select" id="taskProject">
+                            <option value="STR8N UP">STR8N UP</option>
+                            <option value="CSSA">CSSA</option>
+                            <option value="MSA">MSA</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Priority</label>
+                        <select class="form-select" id="taskPriority">
+                            <option value="Low">Low</option>
+                            <option value="Medium">Medium</option>
+                            <option value="High">High</option>
+                            <option value="Urgent">Urgent</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Due Date (Optional)</label>
+                        <input type="date" class="form-input" id="taskDueDate">
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-plus"></i>
+                        Create Task
+                    </button>
+                    <div id="taskResult" class="result"></div>
+                </form>
+            </div>
+
+            <!-- Calendar Event Action -->
+            <div class="action-card">
+                <div class="action-header">
+                    <div class="action-icon calendar">
+                        <i class="fas fa-calendar-plus"></i>
+                    </div>
+                    <div class="action-title">Schedule Event</div>
+                </div>
+                <form id="eventForm">
+                    <div class="form-group">
+                        <label class="form-label">Event Title</label>
+                        <input type="text" class="form-input" id="eventTitle" placeholder="Meeting title" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Start Date & Time</label>
+                        <input type="datetime-local" class="form-input" id="eventStart" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">End Date & Time</label>
+                        <input type="datetime-local" class="form-input" id="eventEnd" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Description (Optional)</label>
+                        <textarea class="form-textarea" id="eventDescription" placeholder="Event details..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-full">
+                        <i class="fas fa-calendar-check"></i>
+                        Create Event
+                    </button>
+                    <div id="eventResult" class="result"></div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Service Worker Registration for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/static/sw.js')
+                    .then(registration => console.log('SW registered'))
+                    .catch(error => console.log('SW registration failed'));
+            });
+        }
+
+        // Form handlers
+        document.getElementById('emailForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleFormSubmit('email', {
+                to_email: document.getElementById('emailTo').value,
+                subject: document.getElementById('emailSubject').value,
+                message: document.getElementById('emailMessage').value
+            });
+        });
+
+        document.getElementById('taskForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleFormSubmit('task', {
+                title: document.getElementById('taskTitle').value,
+                project: document.getElementById('taskProject').value,
+                priority: document.getElementById('taskPriority').value,
+                due_date: document.getElementById('taskDueDate').value
+            });
+        });
+
+        document.getElementById('eventForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            await handleFormSubmit('event', {
+                title: document.getElementById('eventTitle').value,
+                start_datetime: document.getElementById('eventStart').value,
+                end_datetime: document.getElementById('eventEnd').value,
+                description: document.getElementById('eventDescription').value
+            });
+        });
+
+        async function handleFormSubmit(type, data) {
+            const form = document.getElementById(`${type}Form`);
+            const result = document.getElementById(`${type}Result`);
+            const button = form.querySelector('button[type="submit"]');
+            
+            // Show loading state
+            button.classList.add('loading');
+            button.innerHTML = '<span class="spinner"></span> Processing...';
+            result.style.display = 'none';
+            
+            try {
+                const endpoints = {
+                    email: '/send_email',
+                    task: '/create_notion_task',
+                    event: '/create_calendar_event'
+                };
+                
+                const response = await fetch(endpoints[type], {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(data)
+                });
+                
+                const responseData = await response.json();
+                
+                // Show result
+                result.textContent = responseData.result || responseData.message || 'Success!';
+                result.className = `result ${responseData.result?.includes('✅') ? 'success' : 'error'}`;
+                result.style.display = 'block';
+                
+                // Reset form if successful
+                if (responseData.result?.includes('✅')) {
+                    form.reset();
+                }
+                
+            } catch (error) {
+                result.textContent = `❌ Error: ${error.message}`;
+                result.className = 'result error';
+                result.style.display = 'block';
+            } finally {
+                // Reset button
+                button.classList.remove('loading');
+                const icons = {
+                    email: 'fa-paper-plane',
+                    task: 'fa-plus',
+                    event: 'fa-calendar-check'
+                };
+                const labels = {
+                    email: 'Send Email',
+                    task: 'Create Task',
+                    event: 'Create Event'
+                };
+                button.innerHTML = `<i class="fas ${icons[type]}"></i> ${labels[type]}`;
+            }
+        }
+
+        // Auto-set default times for events
+        document.addEventListener('DOMContentLoaded', () => {
+            const now = new Date();
+            const start = new Date(now.getTime() + 60 * 60 * 1000); // 1 hour from now
+            const end = new Date(start.getTime() + 60 * 60 * 1000); // 1 hour duration
+            
+            document.getElementById('eventStart').value = start.toISOString().slice(0, 16);
+            document.getElementById('eventEnd').value = end.toISOString().slice(0, 16);
+        });
+
+        // Install prompt for PWA
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button or banner
+            const installBanner = document.createElement('div');
+            installBanner.innerHTML = `
+                <div style="position: fixed; bottom: 20px; left: 20px; right: 20px; background: var(--primary-orange); color: white; padding: 1rem; border-radius: 0.5rem; z-index: 1000; text-align: center;">
+                    <p style="margin: 0 0 0.5rem 0; font-weight: 600;">Install Super Agent</p>
+                    <p style="margin: 0 0 1rem 0; font-size: 0.9rem;">Add to your home screen for quick access</p>
+                    <button onclick="installApp()" style="background: white; color: var(--primary-orange); border: none; padding: 0.5rem 1rem; border-radius: 0.25rem; font-weight: 600; margin-right: 0.5rem;">Install</button>
+                    <button onclick="this.parentElement.parentElement.remove()" style="background: transparent; color: white; border: 1px solid white; padding: 0.5rem 1rem; border-radius: 0.25rem;">Later</button>
+                </div>
+            `;
+            document.body.appendChild(installBanner);
+        });
+
+        function installApp() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    deferredPrompt = null;
+                    document.querySelector('[style*="position: fixed"]')?.remove();
+                });
+            }
+        }
+    </script>
+</body>
+</html>

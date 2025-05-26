@@ -1,0 +1,917 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>Super Agents</title>
+    
+    <!-- Modern CSS with Your Brand Colors -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        :root {
+            /* STR8N UP Colors */
+            --str8n-orange: #f57c00;
+            --str8n-orange-dark: #e65100;
+            --str8n-cyan: #00bcd4;
+            --str8n-dark: #263238;
+            
+            /* Mi'raj Scouts Colors */
+            --miraj-teal: #006064;
+            --miraj-green: #4db6ac;
+            --miraj-yellow: #ffd54f;
+            --miraj-navy: #37474f;
+            
+            /* CSSA Colors */
+            --cssa-blue: #0277bd;
+            --cssa-light-blue: #4fc3f7;
+            --cssa-orange: #ff6f00;
+            
+            /* Combined Palette */
+            --primary: #0277bd;
+            --primary-light: #4fc3f7;
+            --secondary: #f57c00;
+            --secondary-dark: #e65100;
+            --accent: #00bcd4;
+            --success: #4db6ac;
+            --warning: #ffd54f;
+            --danger: #ff5252;
+            --dark: #263238;
+            --gray: #607d8b;
+            --light: #eceff1;
+            --white: #ffffff;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #006064 0%, #0277bd 50%, #263238 100%);
+            min-height: 100vh;
+            color: var(--dark);
+            position: relative;
+        }
+        
+        /* Animated Background Pattern */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 50%, rgba(0, 188, 212, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 80%, rgba(245, 124, 0, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 40% 20%, rgba(77, 182, 172, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: 1;
+        }
+        
+        /* Header */
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            backdrop-filter: blur(20px);
+            padding: 1rem;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            border-bottom: 3px solid var(--accent);
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .status-indicator {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--success);
+            animation: pulse 2s infinite;
+            box-shadow: 0 0 0 3px rgba(77, 182, 172, 0.3);
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 1rem;
+            position: relative;
+            z-index: 2;
+        }
+        
+        /* Business Cards */
+        .business-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .business-card {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 1.5rem;
+            padding: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .business-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 50%, var(--accent) 100%);
+        }
+        
+        .business-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.15);
+        }
+        
+        .business-card.str8n {
+            border-top: 4px solid var(--str8n-orange);
+        }
+        
+        .business-card.str8n::before {
+            background: linear-gradient(90deg, var(--str8n-orange) 0%, var(--str8n-cyan) 100%);
+        }
+        
+        .business-card.cssa {
+            border-top: 4px solid var(--cssa-blue);
+        }
+        
+        .business-card.cssa::before {
+            background: linear-gradient(90deg, var(--cssa-blue) 0%, var(--cssa-light-blue) 100%);
+        }
+        
+        .business-card.miraj {
+            border-top: 4px solid var(--miraj-teal);
+        }
+        
+        .business-card.miraj::before {
+            background: linear-gradient(90deg, var(--miraj-teal) 0%, var(--miraj-green) 50%, var(--miraj-yellow) 100%);
+        }
+        
+        .business-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .business-card.str8n h3 {
+            color: var(--str8n-orange);
+        }
+        
+        .business-card.cssa h3 {
+            color: var(--cssa-blue);
+        }
+        
+        .business-card.miraj h3 {
+            color: var(--miraj-teal);
+        }
+        
+        .business-stats {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        
+        .stat {
+            flex: 1;
+            text-align: center;
+            padding: 0.75rem;
+            background: var(--light);
+            border-radius: 0.75rem;
+            transition: all 0.2s;
+        }
+        
+        .business-card:hover .stat {
+            transform: scale(1.05);
+        }
+        
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: bold;
+        }
+        
+        .business-card.str8n .stat-value {
+            color: var(--str8n-orange);
+        }
+        
+        .business-card.cssa .stat-value {
+            color: var(--cssa-blue);
+        }
+        
+        .business-card.miraj .stat-value {
+            color: var(--miraj-teal);
+        }
+        
+        .stat-label {
+            font-size: 0.75rem;
+            color: var(--gray);
+            margin-top: 0.25rem;
+        }
+        
+        /* Chat Interface */
+        .chat-container {
+            background: rgba(255, 255, 255, 0.98);
+            border-radius: 1.5rem;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            height: 500px;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 2rem;
+            overflow: hidden;
+        }
+        
+        .chat-header {
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chat-header strong {
+            font-size: 1.1rem;
+        }
+        
+        .chat-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            background: linear-gradient(to bottom, #f8f9fa 0%, #ffffff 100%);
+        }
+        
+        /* Scrollbar Styling */
+        .chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        
+        .chat-messages::-webkit-scrollbar-track {
+            background: var(--light);
+        }
+        
+        .chat-messages::-webkit-scrollbar-thumb {
+            background: var(--gray);
+            border-radius: 3px;
+        }
+        
+        .message {
+            max-width: 80%;
+            padding: 1rem 1.25rem;
+            border-radius: 1.25rem;
+            word-wrap: break-word;
+            animation: fadeIn 0.3s ease-out;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+        
+        @keyframes fadeIn {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px) scale(0.9);
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .message.user {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 0.25rem;
+        }
+        
+        .message.assistant {
+            background: linear-gradient(135deg, #f5f5f5 0%, #e0e0e0 100%);
+            align-self: flex-start;
+            border-bottom-left-radius: 0.25rem;
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+        
+        .chat-input-container {
+            padding: 1.25rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-top: 1px solid var(--light);
+            display: flex;
+            gap: 0.75rem;
+        }
+        
+        .chat-input {
+            flex: 1;
+            padding: 0.875rem 1.25rem;
+            border: 2px solid var(--light);
+            border-radius: 2rem;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: white;
+        }
+        
+        .chat-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(2, 119, 189, 0.1);
+        }
+        
+        .voice-button {
+            background: linear-gradient(135deg, var(--secondary) 0%, var(--secondary-dark) 100%);
+            color: white;
+            border: none;
+            padding: 0.875rem;
+            border-radius: 50%;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(245, 124, 0, 0.3);
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .voice-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(245, 124, 0, 0.4);
+        }
+        
+        .voice-button.recording {
+            background: linear-gradient(135deg, var(--danger) 0%, #ff1744 100%);
+            animation: pulse 1s infinite;
+        }
+        
+        .send-button {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-light) 100%);
+            color: white;
+            border: none;
+            padding: 0.875rem 2rem;
+            border-radius: 2rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 15px rgba(2, 119, 189, 0.3);
+        }
+        
+        .send-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(2, 119, 189, 0.4);
+        }
+        
+        .send-button:active {
+            transform: translateY(0);
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .action-button {
+            background: rgba(255, 255, 255, 0.98);
+            border: 2px solid transparent;
+            padding: 1.25rem;
+            border-radius: 1rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .action-button:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .action-button:nth-child(1):hover { border-color: var(--str8n-orange); }
+        .action-button:nth-child(2):hover { border-color: var(--primary); }
+        .action-button:nth-child(3):hover { border-color: var(--secondary); }
+        .action-button:nth-child(4):hover { border-color: var(--miraj-green); }
+        .action-button:nth-child(5):hover { border-color: var(--cssa-blue); }
+        .action-button:nth-child(6):hover { border-color: var(--accent); }
+        
+        .action-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+            filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+        }
+        
+        .action-label {
+            font-size: 0.875rem;
+            color: var(--gray);
+            font-weight: 500;
+        }
+        
+        /* Loading Animation */
+        .loading {
+            display: inline-block;
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--light);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Notifications */
+        .notification {
+            position: fixed;
+            top: 5rem;
+            right: 1rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 0.75rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            transform: translateX(400px);
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            z-index: 200;
+            max-width: 300px;
+        }
+        
+        .notification.show {
+            transform: translateX(0);
+        }
+        
+        .notification.success {
+            border-left: 4px solid var(--success);
+            background: linear-gradient(to right, rgba(77, 182, 172, 0.1) 0%, white 100%);
+        }
+        
+        .notification.error {
+            border-left: 4px solid var(--danger);
+            background: linear-gradient(to right, rgba(255, 82, 82, 0.1) 0%, white 100%);
+        }
+        
+        /* Mobile Optimizations */
+        @media (max-width: 768px) {
+            .business-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .chat-container {
+                height: 450px;
+                margin-bottom: 1.5rem;
+            }
+            
+            .quick-actions {
+                grid-template-columns: repeat(3, 1fr);
+                gap: 0.75rem;
+            }
+            
+            .action-button {
+                padding: 1rem;
+            }
+            
+            .action-icon {
+                font-size: 2rem;
+            }
+            
+            .header-content {
+                flex-direction: column;
+                gap: 0.75rem;
+                text-align: center;
+            }
+            
+            .container {
+                padding: 0.75rem;
+            }
+            
+            .message {
+                max-width: 85%;
+            }
+        }
+        
+        /* iOS Specific Styles */
+        @supports (-webkit-touch-callout: none) {
+            .chat-input {
+                font-size: 16px; /* Prevents zoom on iOS */
+            }
+            
+            .send-button {
+                -webkit-tap-highlight-color: transparent;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                🤖 Super Agents
+                <div class="status-indicator"></div>
+            </div>
+            <div class="header-stats">
+                <span style="color: var(--gray); font-weight: 500;">Integrated Business Operations</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Business Overview -->
+        <div class="business-grid">
+            <div class="business-card str8n" onclick="showBusinessDetails('STR8N UP')">
+                <h3>
+                    <span style="font-size: 2rem;">🚀</span>
+                    STR8N UP
+                </h3>
+                <p style="color: var(--gray); margin-bottom: 1rem;">Consulting & Development</p>
+                <div class="business-stats">
+                    <div class="stat">
+                        <div class="stat-value">12</div>
+                        <div class="stat-label">Active Clients</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">3</div>
+                        <div class="stat-label">Pending Tasks</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="business-card cssa" onclick="showBusinessDetails('CSSA')">
+                <h3>
+                    <span style="font-size: 2rem;">❤️</span>
+                    CSSA
+                </h3>
+                <p style="color: var(--gray); margin-bottom: 1rem;">Care Support Services</p>
+                <div class="business-stats">
+                    <div class="stat">
+                        <div class="stat-value">28</div>
+                        <div class="stat-label">Participants</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">85%</div>
+                        <div class="stat-label">Audit Ready</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="business-card miraj" onclick="showBusinessDetails('MSA')">
+                <h3>
+                    <span style="font-size: 2rem;">⚜️</span>
+                    Mi'raj Scouts
+                </h3>
+                <p style="color: var(--gray); margin-bottom: 1rem;">Sports & Youth Academy</p>
+                <div class="business-stats">
+                    <div class="stat">
+                        <div class="stat-value">225</div>
+                        <div class="stat-label">Students</div>
+                    </div>
+                    <div class="stat">
+                        <div class="stat-value">44</div>
+                        <div class="stat-label">Camp Ready</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <div class="action-button" onclick="quickAction('create_task')">
+                <div class="action-icon">📝</div>
+                <div class="action-label">Create Task</div>
+            </div>
+            <div class="action-button" onclick="quickAction('add_event')">
+                <div class="action-icon">📅</div>
+                <div class="action-label">Add Event</div>
+            </div>
+            <div class="action-button" onclick="quickAction('send_email')">
+                <div class="action-icon">📧</div>
+                <div class="action-label">Send Email</div>
+            </div>
+            <div class="action-button" onclick="quickAction('check_calendar')">
+                <div class="action-icon">🗓️</div>
+                <div class="action-label">Calendar</div>
+            </div>
+            <div class="action-button" onclick="quickAction('ndis_status')">
+                <div class="action-icon">📋</div>
+                <div class="action-label">NDIS Status</div>
+            </div>
+            <div class="action-button" onclick="quickAction('invoice')">
+                <div class="action-icon">🧾</div>
+                <div class="action-label">Invoice</div>
+            </div>
+            <div class="action-button" onclick="retrieveNotionData('ALL', 'ALL')">
+                <div class="action-icon">📊</div>
+                <div class="action-label">View Tasks</div>
+            </div>
+            <div class="action-button" onclick="retrieveNotionData('ALL', 'In Progress')">
+                <div class="action-icon">⚡</div>
+                <div class="action-label">Active Tasks</div>
+            </div>
+        </div>
+        
+        <!-- Chat Interface -->
+        <div class="chat-container">
+            <div class="chat-header">
+                <span style="font-size: 1.5rem;">🤖</span>
+                <strong>OPS.PY Assistant</strong>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <div class="message assistant">
+                    Hello! I'm OPS.PY, your integrated business operations assistant. I can help you manage tasks across STR8N UP, CSSA, and Mi'raj Scouts Academy. How can I assist you today?
+                </div>
+            </div>
+            <div class="chat-input-container">
+                <input type="text" class="chat-input" id="chatInput" placeholder="Type your message..." onkeypress="handleKeyPress(event)">
+                <button class="voice-button" id="voiceButton" onclick="toggleVoiceRecording()" title="Voice Message">🎤</button>
+                <button class="send-button" onclick="sendMessage()">Send</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notification -->
+    <div class="notification" id="notification"></div>
+    
+    <!-- JavaScript -->
+    <script>
+        // Chat functionality
+        async function sendMessage() {
+            const input = document.getElementById('chatInput');
+            const message = input.value.trim();
+            
+            if (!message) return;
+            
+            // Add user message
+            addMessage(message, 'user');
+            input.value = '';
+            
+            // Show loading
+            const loadingId = addMessage('<div class="loading"></div>', 'assistant');
+            
+            try {
+                // Send to backend
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message: message })
+                });
+                
+                const data = await response.json();
+                
+                // Remove loading and add response
+                document.getElementById(loadingId).remove();
+                addMessage(data.response || 'Sorry, I encountered an error.', 'assistant');
+                
+            } catch (error) {
+                document.getElementById(loadingId).remove();
+                addMessage('Sorry, I could not connect to the server.', 'assistant');
+                showNotification('Connection error', 'error');
+            }
+        }
+        
+        function addMessage(content, type) {
+            const messages = document.getElementById('chatMessages');
+            const messageDiv = document.createElement('div');
+            const messageId = 'msg-' + Date.now();
+            messageDiv.id = messageId;
+            messageDiv.className = `message ${type}`;
+            messageDiv.innerHTML = content;
+            messages.appendChild(messageDiv);
+            messages.scrollTop = messages.scrollHeight;
+            return messageId;
+        }
+        
+        function handleKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendMessage();
+            }
+        }
+        
+        // Quick Actions
+        async function quickAction(action) {
+            let message = '';
+            
+            switch(action) {
+                case 'create_task':
+                    message = 'Create a new task for STR8N UP about reviewing client proposals';
+                    break;
+                case 'add_event':
+                    message = 'Add a meeting tomorrow at 2pm for CSSA audit preparation';
+                    break;
+                case 'send_email':
+                    message = 'Send an email update about Mi\'raj Scouts Term 1 enrollment';
+                    break;
+                case 'check_calendar':
+                    message = 'What are my upcoming events this week?';
+                    break;
+                case 'ndis_status':
+                    message = 'Check NDIS compliance status for CSSA';
+                    break;
+                case 'invoice':
+                    message = 'Generate an invoice for consulting services';
+                    break;
+            }
+            
+            document.getElementById('chatInput').value = message;
+            sendMessage();
+        }
+        
+        // Voice Recording Functionality
+        let isRecording = false;
+        let mediaRecorder = null;
+        let audioChunks = [];
+        
+        async function toggleVoiceRecording() {
+            const voiceButton = document.getElementById('voiceButton');
+            
+            if (!isRecording) {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+                    
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+                    
+                    mediaRecorder.onstop = async () => {
+                        const audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        await uploadVoiceMessage(audioBlob);
+                        
+                        // Stop all tracks to release microphone
+                        stream.getTracks().forEach(track => track.stop());
+                    };
+                    
+                    mediaRecorder.start();
+                    isRecording = true;
+                    voiceButton.classList.add('recording');
+                    voiceButton.innerHTML = '⏹️';
+                    voiceButton.title = 'Stop Recording';
+                    
+                } catch (error) {
+                    console.error('Error accessing microphone:', error);
+                    showNotification('Microphone access denied', 'error');
+                }
+            } else {
+                mediaRecorder.stop();
+                isRecording = false;
+                voiceButton.classList.remove('recording');
+                voiceButton.innerHTML = '🎤';
+                voiceButton.title = 'Voice Message';
+            }
+        }
+        
+        async function uploadVoiceMessage(audioBlob) {
+            try {
+                const formData = new FormData();
+                formData.append('audio', audioBlob, 'voice-message.wav');
+                
+                const response = await fetch('/api/voice/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const data = await response.json();
+                
+                if (data.transcription) {
+                    // Add transcribed message to chat input
+                    document.getElementById('chatInput').value = data.transcription;
+                    showNotification('Voice message transcribed', 'success');
+                } else {
+                    showNotification('Voice transcription failed', 'error');
+                }
+                
+            } catch (error) {
+                console.error('Voice upload error:', error);
+                showNotification('Voice upload failed', 'error');
+            }
+        }
+        
+        // Data Retrieval Functions
+        async function retrieveNotionData(business = 'ALL', status = 'ALL') {
+            try {
+                const response = await fetch('/retrieve_notion_data', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        business: business,
+                        status: status,
+                        limit: 10
+                    })
+                });
+                
+                const data = await response.json();
+                addMessage(data.result || 'No data retrieved', 'assistant');
+                
+            } catch (error) {
+                console.error('Data retrieval error:', error);
+                addMessage('Failed to retrieve data from Notion', 'assistant');
+            }
+        }
+        
+        // Business Details
+        function showBusinessDetails(business) {
+            const message = `Tell me about ${business} - current tasks and status`;
+            document.getElementById('chatInput').value = message;
+            sendMessage();
+        }
+        
+        // Notifications
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.className = `notification ${type} show`;
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Load initial data
+        async function loadDashboard() {
+            try {
+                const response = await fetch('/api/overview');
+                const data = await response.json();
+                // Update UI with data
+                showNotification('Dashboard loaded successfully', 'success');
+            } catch (error) {
+                console.error('Failed to load dashboard:', error);
+            }
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadDashboard();
+            
+            // Add some entrance animations
+            const cards = document.querySelectorAll('.business-card');
+            cards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s cubic-bezier(0.4, 0, 0.2, 1)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, index * 100);
+            });
+            
+            const actions = document.querySelectorAll('.action-button');
+            actions.forEach((action, index) => {
+                action.style.opacity = '0';
+                action.style.transform = 'scale(0.8)';
+                setTimeout(() => {
+                    action.style.transition = 'all 0.4s cubic-bezier(0.4, 0, 0.2, 1)';
+                    action.style.opacity = '1';
+                    action.style.transform = 'scale(1)';
+                }, 300 + index * 50);
+            });
+        });
+    </script>
+</body>
+</html>
